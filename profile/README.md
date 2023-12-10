@@ -2,13 +2,9 @@
 
 ![logo](https://github.com/HeroTicket/.github/assets/61569834/c7c129be-9d7c-41f0-b632-4e2483f43186)
 
-<br>
-
 <h1 align="center">A blockchain based ticketing platform</h1>
 
 </div>
-
-<br>
 
 ## Table of Contents
 
