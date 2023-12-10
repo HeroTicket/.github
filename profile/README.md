@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./logo.png" alt="Hero Ticket Logo" width="960px">
+![logo](https://github.com/HeroTicket/.github/assets/61569834/c7c129be-9d7c-41f0-b632-4e2483f43186)
 
 <br>
 
