@@ -10,11 +10,12 @@
 
 1. [About](#about)
 2. [Links](#links)
-3. [How we built it](#how-we-built-it)
+3. [Service Architecture](#service-architecture)
+4. [How we built it](#how-we-built-it)
     - [Smart Contract](#smart-contract)
     - [Backend](#backend)
     - [Frontend](#frontend)
-4. [What's next for Hero Ticket](#whats-next-for-hero-ticket)
+5. [What's next for Hero Ticket](#whats-next-for-hero-ticket)
 
 
 ## About
@@ -33,6 +34,10 @@ Finally, anyone with a valid identity can issue tickets. This allows anyone to i
 - [Project Website](https://heroticket.xyz/)
 - [Devpost](https://devpost.com/software/hero-ticket)
 - [Swagger](https://app.swaggerhub.com/apis/CREWE1746/HeroTicket/1.0.0)
+
+## Service Architecture
+
+![Untitled-2023-06-04-1739](https://github.com/HeroTicket/.github/assets/61569834/019e84bc-8dc5-477c-8d66-3e8eb5b3eb96)
 
 ## How we built it
 
