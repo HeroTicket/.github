@@ -37,7 +37,7 @@ Finally, anyone with a valid identity can issue tickets. This allows anyone to i
 
 ## Service Architecture
 
-![Untitled-2023-06-04-1739](https://github.com/HeroTicket/.github/assets/61569834/019e84bc-8dc5-477c-8d66-3e8eb5b3eb96)
+![Untitled-2023-06-04-1739](https://github.com/HeroTicket/.github/assets/61569834/b97d60f2-d2b2-403e-b36a-acb186d756c9)
 
 ## How we built it
 
