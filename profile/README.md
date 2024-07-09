@@ -11,11 +11,12 @@
 1. [About](#about)
 2. [Links](#links)
 3. [Service Architecture](#service-architecture)
-4. [How we built it](#how-we-built-it)
+4. [Process Flow](#process-flow)
+5. [How we built it](#how-we-built-it)
     - [Smart Contract](#smart-contract)
     - [Backend](#backend)
     - [Frontend](#frontend)
-5. [What's next for Hero Ticket](#whats-next-for-hero-ticket)
+6. [What's next for Hero Ticket](#whats-next-for-hero-ticket)
 
 
 ## About
@@ -38,6 +39,104 @@ Finally, anyone with a valid identity can issue tickets. This allows anyone to i
 ## Service Architecture
 
 ![Untitled-2023-06-04-1739](https://github.com/HeroTicket/.github/assets/61569834/a4358fba-d700-4107-90c0-fdf770cca319)
+
+## Process Flow
+
+### 로그인
+
+1. **로그인 버튼 클릭**
+2. **클라이언트에서 웹소켓 연결**
+   - `wss://api.heroticket.xyz/ws`로 연결
+3. **서버에서 웹소켓을 통해 sessionId 전달**
+   - `type: 'id'`로 sessionId 전달
+4. **sessionId를 쿼리 파라미터로 담아 로그인 QR 요청**
+   - `GET api.heroticket.xyz/v1/users/login-qr`
+5. **클라이언트에서 QR 코드 렌더링**
+6. **사용자가 QR 코드 스캔**
+7. **사용자가 Polygon ID 앱에서 로그인 콜백 요청**
+   - `POST api.heroticket.xyz/v1/users/login-callback`
+8. **로그인이 완료되면 웹소켓을 통해 JWT 토큰 페어 전달**
+   - `type: 'event'`
+   - `event: { name: '', status: 'DONE', data: jwt 토큰페어 }`
+9. **클라이언트에서 JWT 토큰 페어 저장**
+   - 세션, 로컬스토리지, 쿠키, 상태변수 등
+10. **사용자 정보 요청**
+    - `Authorization: Bearer 액세스토큰`을 헤더에 담아 `GET api.heroticket.xyz/v1/users/info`
+    - 응답 코드가 404 Not Found인 경우, 사용자 등록 버튼(또는 페이지) 표시
+11. **클라이언트 측에서 웹소켓 연결 끊기**
+
+### 사용자 등록
+
+1. **클라이언트 측에서 사용자 지갑 연결 확인**
+   - 연결된 지갑의 계정 주소 필요
+2. **사용자가 계정 생성 버튼 클릭**
+3. **계정 생성 요청**
+   - `POST api.heroticket.xyz/v1/users/register/{accountAddress}`
+   - 계정 주소를 경로에 담아 요청
+   - 계정 주소는 DID와 매핑되며 유니크해야 함
+   - 계정 주소를 소유자로 TBA 주소 발급
+4. **응답 코드 201 Created와 함께 생성된 사용자 정보 반환**
+
+### 로그아웃
+
+1. **클라이언트 측에서 토큰만 제거**
+
+### 티켓 생성
+
+1. **티켓 생성 페이지 이동**
+   - 로그인한 사용자만
+2. **티켓 생성**
+   - 먼저 컨트랙트를 호출하여 티켓 이미지 생성
+   - `ticketUri` 값으로 임의의 값을 넣기
+   - `ticketUri` 외에 다른 폼 데이터 채우기
+     - 일부 최솟값 존재: `ethPrice - 1e9`, `tokenPrice - 1`, `totalSupply - 1`, `saleDuration - 1 day`
+   - 티켓을 생성하기 위해서는 토큰이 100개 필요하므로 체크
+   - 티켓 생성
+
+### 티켓 구매
+
+1. **티켓 리스트에서 티켓 선택**
+   - `GET v1/tickets`로 티켓 리스트 가져오기
+2. **티켓 상세 정보 불러오기**
+   - `GET v1/tickets/{contractAddress}`
+3. **티켓 상세 정보 표시**
+   - `saleStartAt`, `saleEndAt`, `createdAt`, `updatedAt` 등 모든 시간은 Unix 타임으로 저장됨
+   - 사용자에게 맞는 시간으로 파싱
+
+#### 티켓 구매 - 이더로 구매하기
+
+1. **이더로 구매하기 버튼 클릭**
+2. **클라이언트에서 서버로 웹소켓 연결**
+   - sessionId 받기
+3. **QR 코드 요청**
+   - `GET v1/tickets/{contractAddress}/whitelist-qr`
+4. **QR 코드 처리**
+   - 이미 whitelist에 등록된 사용자인 경우, 서버에서 202 응답 반환
+   - QR 코드 반환
+5. **사용자가 폴리곤 아이디 앱으로 QR 코드 스캔**
+   - 콜백 요청: `POST v1/tickets/{contractAddress}/whitelist-callback`
+6. **콜백 요청 처리**
+   - 웹소켓을 통해 'whitelist-callback' 이벤트 정보 전송
+   - 사용자 폴리곤 아이디 앱에는 인증 완료 응답 전송
+7. **이더로 결제할 수 있는 버튼 표시**
+8. **사용자 이더로 티켓 결제**
+9. **티켓 구매 완료**
+
+#### 티켓 구매 - 토큰으로 구매하기
+
+1. **토큰으로 구매하기 버튼 클릭**
+   - 토큰 잔액 확인 필요
+2. **클라이언트에서 서버로 웹소켓 연결**
+   - sessionId 받기
+3. **QR 코드 요청**
+   - `GET v1/tickets/{contractAddress}/token-purchase-qr`
+4. **QR 코드 표시**
+5. **사용자가 폴리곤 아이디 앱으로 QR 코드 스캔**
+   - 콜백 요청: `POST v1/tickets/{contractAddress}/token-purchase-callback`
+6. **콜백 요청 처리**
+   - 웹소켓을 통해 'token-purchase-callback' 이벤트 정보 전송
+   - 사용자 폴리곤 아이디 앱에는 인증 완료 응답 전송
+7. **구매 완료 표시**
 
 ## How we built it
 
